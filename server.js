@@ -4,7 +4,7 @@ const router = express.Router();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const {ShoppingList, Recipes} = require('./models');
+const { ShoppingList, Recipes } = require('./models');
 
 const jsonParser = bodyParser.json();
 const app = express();
@@ -34,7 +34,7 @@ app.get('/shopping-list', (req, res) => {
 app.post('/shopping-list', jsonParser, (req, res) => {
   // ensure `name` and `budget` are in request body
   const requiredFields = ['name', 'budget'];
-  for (let i=0; i<requiredFields.length; i++) {
+  for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
       const message = `Missing \`${field}\` in request body`
@@ -54,7 +54,7 @@ app.post('/shopping-list', jsonParser, (req, res) => {
 // call `ShoppingList.update` with updated item.
 app.put('/shopping-list/:id', jsonParser, (req, res) => {
   const requiredFields = ['name', 'budget', 'id'];
-  for (let i=0; i<requiredFields.length; i++) {
+  for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
       const message = `Missing \`${field}\` in request body`
@@ -65,7 +65,7 @@ app.put('/shopping-list/:id', jsonParser, (req, res) => {
   if (req.params.id !== req.body.id) {
     const message = (
       `Request path id (${req.params.id}) and request body id `
-      `(${req.body.id}) must match`);
+        `(${req.body.id}) must match`);
     console.error(message);
     return res.status(400).send(message);
   }
@@ -94,7 +94,7 @@ app.get('/recipes', (req, res) => {
 app.post('/recipes', jsonParser, (req, res) => {
   // ensure `name` and `budget` are in request body
   const requiredFields = ['name', 'ingredients'];
-  for (let i=0; i<requiredFields.length; i++) {
+  for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
       const message = `Missing \`${field}\` in request body`
@@ -111,6 +111,32 @@ app.delete('/recipes/:id', (req, res) => {
   console.log(`Deleted recipe \`${req.params.ID}\``);
   res.status(204).end();
 });
+
+app.put('/recipes/:id', jsonParser, (req, res) => {
+  const requiredFields = ["name", "id", "ingredients"];
+  for (let i = 0; i < requiredFields.length; i++) {
+    const field = requiredFields[i];
+    if (!(field in req.body)) {
+      const message = `Missing \`${field}\` in request body`
+      console.error(message);
+      return res.status(400).send(message);
+    }
+  }
+  if (req.params.id !== req.body.id) {
+    const message = (
+      `Request path id (${req.params.id}) and request body id `
+        `(${req.body.id}) must match`);
+    console.error(message);
+    return res.status(400).send(message);
+  }
+  console.log(`Updating recipe item \`${req.params.id}\``);
+  const updatedItem = Recipes.update({
+    id: req.params.id,
+    name: req.body.name,
+    ingredients: req.body.ingredients
+  });
+  res.status(204).json(updatedItem);
+})
 
 app.listen(process.env.PORT || 8080, () => {
   console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
